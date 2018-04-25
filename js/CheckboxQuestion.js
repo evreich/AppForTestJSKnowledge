@@ -5,7 +5,7 @@ class CheckboxQuestion extends Question{
         super(_answers, _options, _text, _timeOut);
     }
 
-    handleNext(createNewQuestion, addToListMethod){
+    handleNext(returnQuestion){
         let textChoosenOptions = new Array();
         //сбор результатов с формы
         document.getElementsByName("questionCheckbox").forEach(function (elem) {
@@ -14,8 +14,9 @@ class CheckboxQuestion extends Question{
             }
         });
 
-        //вызов функции родителя
-        super.handleNext(createNewQuestion, addToListMethod, textChoosenOptions);
+        //вызов функции родителя для подсчета очков
+        super.handleNext(textChoosenOption);
+        returnQuestion(this);
     }
 
     init(contentElem, questionInfo){
@@ -27,7 +28,7 @@ class CheckboxQuestion extends Question{
         nextQuestionButton.addEventListener(
             "click",
             function (){
-                handleNext(questionInfo.createNewQuestion, questionInfo.addToListMethod);
+                handleNext(questionInfo.returnQuestion);
             },
             false
         );

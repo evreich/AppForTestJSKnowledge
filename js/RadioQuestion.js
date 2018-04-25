@@ -5,7 +5,7 @@ class RadioQuestion extends Question{
         super(_answers, _options, _text, _timeOut);
     }
 
-    handleNext(createNewQuestion, addToListMethod){
+    handleNext(returnQuestion){
         let textChoosenOption = new Array();
         //сбор результатов с формы
         const radioInputs = document.getElementsByName("questionRadio");
@@ -16,8 +16,9 @@ class RadioQuestion extends Question{
             }
         }
     
-        //вызов функции родителя
-        super.handleNext(createNewQuestion, addToListMethod, textChoosenOption);
+        //вызов функции родителя для подсчета очков
+        super.handleNext(textChoosenOption);
+        returnQuestion(this);
     }
 
     init(contentElem, questionInfo){
@@ -29,7 +30,7 @@ class RadioQuestion extends Question{
         nextQuestionButton.addEventListener(
             "click",
             function () {
-                handleNext(questionInfo.createNewQuestion, questionInfo.addToListMethod);
+                handleNext(questionInfo.returnQuestion);
             },
             false
         );

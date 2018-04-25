@@ -12,19 +12,16 @@ class Question{
     }
 
     get getScore(){
-        return privateData.get(this).scores;
+        return scores.get(this);
     }
 
-    handleNext(createNextQuestion, addQuestionToHistory, result) {
+    handleNext(result) {
         result.forEach(function(elem) {
             if (answers.includes(elem))
             {
                 this.getScore()++;
             }               
         });
-
-        addQuestionToHistory(this);
-        createNextQuestion();
     };
     //возможно нужен аналог bind
 
@@ -42,11 +39,11 @@ class Question{
 
         const questionTitle = document.createElement("h3");
         questionTitle.className = "d-block";
-        questionTitle.innerText = "Вопрос " + questionInfo.qIndex;
+        questionTitle.innerText = "Вопрос " + questionInfo.questionIndex;
         questionHeaderContainer.appendChild(questionTitle);
 
         //добавляем таймер на страницу, если имеем соотв значение
-        const timeOut = privateData.get(this).timeOut;
+        const timeOut = timeOut.get(this);
         if (timeOut) {
             const questionTimer = document.createElement("h4");
             questionTimer.id = "timer";
@@ -81,7 +78,7 @@ class Question{
 
         const questionSequence = document.createElement("h4");
         questionSequence.className = "d-block";
-        questionSequence.innerText = questionInfo.qIndex + " из " + questionInfo.qCount;
+        questionSequence.innerText = questionInfo.questionIndex + " из " + questionInfo.questionCount;
        
         questionHeaderContainer.appendChild(questionSequence);
         contentElem.appendChild(questionHeaderContainer);
