@@ -29,7 +29,8 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['env', 'stage-3']
+            plugins: ['transform-runtime'],
+            presets: ['es2015', 'env', 'stage-3']
           }
         }
       },

@@ -133,8 +133,8 @@ function ajaxToService(serviceMethodName){
     });
 };
 
-const questionGenerator = async function*() {
-    ajaxToService(serviceUrl+"TestInit").then((countQuestion) => {
+async function* questionGenerator() {
+    ajaxToService(serviceUrl+"TestInit").then(function(countQuestion){
         for(let i=1; i<=countQuestion; i++){
             yield await createNewQuestionObject(i, countQuestion);
         }
