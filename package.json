@@ -1,0 +1,38 @@
+{
+    "name": "appfortestjs_package",
+    "description": "TestJSKnowledgeApp",
+    "version": "1.0.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/evreich/AppForTestJSKnowledge.git"
+    },
+    "license": "ISC",
+    "scripts": {
+        "build": "webpack -p",
+        "start": "webpack-dev-server --open",
+        "watch": "webpack --watch"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome": "^1.1.5",
+        "babel-core": "^6.26.0",
+        "babel-loader": "^7.1.4",
+        "babel-preset-stage-3": "^6.24.1",
+        "bootstrap": "^4.1.0",
+        "css-loader": "^0.28.11",
+        "font-awesome": "^4.7.0",
+        "jquery": "^3.3.1",
+        "popper.js": "^1.14.3",
+        "url-loader": "^1.0.1",
+        "webpack": "^4.6.0"
+    },
+    "devDependencies": {
+        "babel-polyfill": "^6.26.0",
+        "babel-preset-env": "^1.6.1",
+        "extract-text-webpack-plugin": "^4.0.0-beta.0",
+        "file-loader": "^1.1.11",
+        "sass-loader": "^7.0.1",
+        "style-loader": "^0.21.0",
+        "webpack-cli": "^2.0.15",
+        "webpack-dev-server": "^3.1.3"
+    }
+}
