@@ -1,4 +1,4 @@
-import Question from "./Question";
+import Question from "./Question.js";
 
 class RadioQuestion extends Question{
     constructor(_answers, _options, _text, _timeOut){
@@ -9,7 +9,7 @@ class RadioQuestion extends Question{
         let textChoosenOption = new Array();
         //сбор результатов с формы
         const radioInputs = document.getElementsByName("questionRadio");
-        for(let radioOption in radioInputs) {
+        for(let radioOption of radioInputs) {
             if (radioOption.checked) {
                 textChoosenOption.push(radioOption.value);
                 break;
@@ -30,8 +30,8 @@ class RadioQuestion extends Question{
         nextQuestionButton.addEventListener(
             "click",
             function () {
-                handleNext(questionInfo.returnQuestion);
-            },
+                this.handleNext(questionInfo.returnQuestion);
+            }.bind(this),
             false
         );
     
@@ -68,8 +68,9 @@ class RadioQuestion extends Question{
             return questionOptionContainer;
         }
     
+        let key = 0;
         this.options.forEach(function(elem) {
-            contentElem.appendChild(createOption(elem.value, elem.key));
+            contentElem.appendChild(createOption(elem, ++key));
             contentElem.appendChild(document.createElement("br"));
         });
     

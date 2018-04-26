@@ -1,4 +1,4 @@
-import Question from "./Question";
+import Question from "./Question.js";
 
 class CheckboxQuestion extends Question{
     constructor(_answers, _options, _text, _timeOut){
@@ -15,7 +15,7 @@ class CheckboxQuestion extends Question{
         });
 
         //вызов функции родителя для подсчета очков
-        super.handleNext(textChoosenOption);
+        super.handleNext(textChoosenOptions);
         returnQuestion(this);
     }
 
@@ -28,8 +28,8 @@ class CheckboxQuestion extends Question{
         nextQuestionButton.addEventListener(
             "click",
             function (){
-                handleNext(questionInfo.returnQuestion);
-            },
+                this.handleNext(questionInfo.returnQuestion);
+            }.bind(this),
             false
         );
 
@@ -77,9 +77,9 @@ class CheckboxQuestion extends Question{
 
             return questionOptionContainer;
         }
-
+        let key = 0;
         this.options.forEach(function(elem) {
-            contentElem.appendChild(createCheckbox(elem.value, elem.key));
+            contentElem.appendChild(createCheckbox(elem,++key));
             contentElem.appendChild(document.createElement("br"));
         });
 

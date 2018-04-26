@@ -1,25 +1,25 @@
 const path = require('path');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
-  mode: 'development',
   entry: ['babel-polyfill', './js/index.js'],
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
+    publicPath: 'dist/',
   },
-  devtool: 'source-map',
+  devtool: 'inline-source-map',
   devServer: {
-    contentBase: './dist',
+    contentBase: path.resolve(__dirname, 'dist'),
     port: 8000,
     proxy:{
       "/api": {
         target: "http://localhost:61509/TestService/",
         pathRewrite: {"^/api" : ""}
       }
-    },
-    hot: true
+    }
   },
   module: {
     rules: [
@@ -29,7 +29,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            plugins: ['transform-runtime'],
+            plugins: ['transform-runtime', "transform-async-generator-functions"],
             presets: ['es2015', 'env', 'stage-3']
           }
         }
@@ -45,6 +45,5 @@ module.exports = {
   },
   plugins: [
     new ExtractTextPlugin("styles.css"),
-    new webpack.HotModuleReplacementPlugin()
   ]
 };

@@ -7,7 +7,7 @@ class Question{
         answers.set(this, _answers);
         scores.set(this, 0);
         timeOut.set(this, _timeOut);
-        this.text = text;
+        this.text = _text;
         this.options = new Array(..._options);        
     }
 
@@ -16,14 +16,14 @@ class Question{
     }
 
     handleNext(result) {
+        let counter = 0;
+        const ans = answers.get(this);
         result.forEach(function(elem) {
-            if (answers.includes(elem))
-            {
-                this.getScore()++;
-            }               
+            if (ans.includes(elem))
+                counter++;             
         });
+        scores.set(this,counter);
     };
-    //возможно нужен аналог bind
 
     init(contentElem, questionInfo, nextQuestionButton) {
         function getCorrectTimeFromSeconds(time) {
@@ -43,15 +43,15 @@ class Question{
         questionHeaderContainer.appendChild(questionTitle);
 
         //добавляем таймер на страницу, если имеем соотв значение
-        const timeOut = timeOut.get(this);
-        if (timeOut) {
+        const _timeOut = timeOut.get(this);
+        if (_timeOut) {
             const questionTimer = document.createElement("h4");
             questionTimer.id = "timer";
             questionTimer.className = "ml-2";
             questionTimer.style = "color: red; display:inline-block";
-            questionTimer.innerText = getCorrectTimeFromSeconds(timeOut);
+            questionTimer.innerText = getCorrectTimeFromSeconds(_timeOut);
 
-            let currTimeout = timeOut;
+            let currTimeout = _timeOut;
             let timerId = setTimeout(function tick() {
                 if (currTimeout === 0) {
                     nextQuestionButton.disabled = false;
