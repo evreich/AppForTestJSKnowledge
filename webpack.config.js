@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: ['babel-polyfill', './js/index.js'],
+  entry: ['whatwg-fetch','babel-polyfill', './js/index.js'],
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
@@ -29,7 +29,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            plugins: ['transform-runtime', "transform-async-generator-functions"],
+            plugins: ['transform-runtime', "transform-async-generator-functions", "transform-object-rest-spread"],
             presets: ['es2015', 'env', 'stage-3']
           }
         }

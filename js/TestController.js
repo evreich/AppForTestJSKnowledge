@@ -1,59 +1,39 @@
+"use strict";
+
 import RadioQuestion from "./RadioQuestion.js";
 import CheckboxQuestion from "./CheckboxQuestion.js";
+import * as decodeHelper from "../utils/decodeBase64Helpers.js";
+import * as htmlHelper from "../utils/htmlHelpers.js";
 
 let instance = null;
-let questionList = new Array();
-const serviceUrl = new WeakMap();
+let questionList = [];
+const serviceUrl = "api/";
 let pageContent;
 
 const loadQuestionData = (index) => {
-    return ajaxToService(serviceUrl.get(instance) + "GetNext/" + index).then(response => response.json());
+    return ajaxToService(`${serviceUrl}GetNext/${index}`);
 };
 
 function createNewQuestionObject(questionIndex, questionCount) {
-    return new Promise(function (resolve, reject) {
-        loadQuestionData(questionIndex).then((question) => {
-            const newQuestion = questionFactory(question);
-            //инициируем генерацию страницы вопроса и передаем данные для question
-            function returnQuestion() {
-                resolve(newQuestion);
+    return loadQuestionData(questionIndex)
+        .then(question => questionFactory(question))
+        .then(newQuestion => new Promise(
+            resolve => {
+                const questionInfo = {
+                    questionIndex,
+                    questionCount,
+                    returnQuestion : resolve
+                };
+                newQuestion.init(pageContent, questionInfo);
             }
-            const questionInfo = {
-                questionIndex,
-                questionCount,
-                returnQuestion
-            };
-            newQuestion.init(pageContent, questionInfo);
-        })
-            .catch((errorMessage) => {
-                reject(errorMessage);
-            });
-    })
+        ));
 };
 
 function questionFactory(inputQuestion) {
-    const separator = "#;";
-
-    function decodeArray(encodedArray) {
-        let decodeRes = new Array();
-        let i = 1;
-        encodedArray.split(separator).forEach(function (elem) {
-            decodeRes.push(b64DecodeUnicode(elem));
-        });
-        return decodeRes;
-    }
-
-    function b64DecodeUnicode(str) {
-        // Going backwards: from bytestream, to percent-encoding, to original string.
-        return decodeURIComponent(atob(str).split('').map(function (c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-    }
-
     //декодируем вопрос путем раскодирования из base 64 в ANSI, а затем кодирования/раскодирования в UTF-8
-    const decodeTest = b64DecodeUnicode(inputQuestion.text);
-    const decodeOptions = decodeArray(inputQuestion.options);
-    const decodeAnswers = decodeArray(inputQuestion.answers);
+    const decodeTest = decodeHelper.b64DecodeUnicode(inputQuestion.text);
+    const decodeOptions = decodeHelper.decodeArray(inputQuestion.options);
+    const decodeAnswers = decodeHelper.decodeArray(inputQuestion.answers);
 
     //генерация объекта вопроса и связывание с родительским классом
     let question;
@@ -65,57 +45,19 @@ function questionFactory(inputQuestion) {
     return question;
 };
 
-function clearContainer() {
-    while (pageContent.firstChild) {
-        pageContent.removeChild(pageContent.firstChild);
-    }
-}
-
 function showResult() {
     //вычисление суммы баллов
-    const commonScore = questionList.reduce(function (sum, nextElem) {
-        return sum + nextElem.getScore;
-    }, 0);
+    const commonScore = questionList.reduce((sum, nextElem) => sum + nextElem.getScore, 0);
+    console.log(commonScore);
     //очистка контейнера
-    clearContainer();
+    htmlHelper.clearContainer(pageContent);
     //отрисовка итоговой страницы
-    var titleDiv = document.createElement("div");
-    titleDiv.className = "d-flex justify-content-sm-center mt-3";
-    var titleOfEndTest = document.createElement("h2");
-    titleOfEndTest.innerText = "Тест окончен!";
-    titleDiv.appendChild(titleOfEndTest);
-
-    var resultDiv = document.createElement("div");
-    resultDiv.className = "d-flex justify-content-sm-center mt-3";
-    var result = document.createElement("h4");
-    result.innerText = "Ваши баллы: " + commonScore;
-    resultDiv.appendChild(result);
-
-    var restartTestButton = document.createElement("button");
-    restartTestButton.id = "restartTest";
-    restartTestButton.className = "d-block btn btn-success btn-block";
-    restartTestButton.innerText = "Пройти тест еще раз";
-    restartTestButton.addEventListener(
-        "click",
-        function () {
-            questionList = [];
-            clearContainer();
-            instance.init();
-        },
-        false
-    );
-
-    var contentDiv = document.createElement("div");
-    contentDiv.appendChild(titleDiv);
-    contentDiv.appendChild(resultDiv);
-    contentDiv.appendChild(document.createElement("br"));
-    contentDiv.appendChild(restartTestButton);
-
+    const contentDiv = htmlHelper.drawResultPage(commonScore, instance.init, pageContent);
     pageContent.appendChild(contentDiv);
 };
 
 function addQuestionToList(question) {
-    questionList.push(question)
+    questionList.push(question);
 };
 
 function ajaxToService(serviceMethodName) {
@@ -124,70 +66,41 @@ function ajaxToService(serviceMethodName) {
         mode: 'cors',
         method: 'GET'
     })
-    .catch((response) => {
-        const errorMessage = 'Ошибка: ' + (response.status ? response.statusText : ', запрос не удался');
-        alert(errorMessage);
-        throw errorMessage;
-    });
+        .then(response => response.json());
 };
 
 async function* questionGenerator() {
-    const initResponse = await ajaxToService(serviceUrl.get(instance) + "TestInit");  
-    const countQuestion = await initResponse.text();
-    for (let i = 1; i <= countQuestion; i++) {
-        yield await createNewQuestionObject(i, countQuestion);
+    try {
+        const countQuestion = await ajaxToService(`${serviceUrl}TestInit`);
+        for (let i = 1; i <= countQuestion; i++) {
+            yield await createNewQuestionObject(i, countQuestion);
+        };
     }
-}
+    catch (err) {
+        console.log(err.stack);
+        alert(`Возникла ошибка приложения:${err.message}`);
+    }
+};
 
 class TestController {
     constructor(templateDiv) {
         if (!instance) {
             instance = this;
         }
-        serviceUrl.set(this, "api/");
         pageContent = templateDiv;
         return instance;
     }
 
     async init() {
-        (function drawPage() {
-            //отрисовка страницы
-            const testTitle = document.createElement("h3");
-            testTitle.className = "d-block mb-2";
-            testTitle.innerText = "Тестирование знаний JavaScript";
-
-            const startTestButton = document.createElement("button");
-            startTestButton.id = "startTest";
-            startTestButton.className = "d-block btn btn-success btn-lg center-elem w-50";
-            startTestButton.innerText = "Начать";
-            startTestButton.addEventListener(
-                "click",
-                function startTest() {
-                    pageContent.classList.remove("main-content");
-                    pageContent.classList.add("question-content");
-                    startTestAction();
-                    startTestButton.removeEventListener("click", startTest, false);
-                    clearContainer();
-                },
-                false
-            );
-
-            const contentDiv = document.createElement("div");
-            contentDiv.appendChild(testTitle);
-            contentDiv.appendChild(document.createElement("br"));
-            contentDiv.appendChild(startTestButton);
-
-            pageContent.appendChild(contentDiv);
-            pageContent.classList.add("main-content");
-        })();
-
+        questionList = [];
+        htmlHelper.drawStartPage(startTestAction, pageContent);
         async function startTestAction() {
             const iteratorQuestions = questionGenerator();
             for await (const question of iteratorQuestions) {
-                clearContainer();
+                htmlHelper.clearContainer(pageContent);
                 addQuestionToList(question);
             }
-            showResult();             
+            showResult();
         };
     }
 }
