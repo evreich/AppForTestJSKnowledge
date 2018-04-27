@@ -148,7 +148,8 @@ export function createCheckbox(text, key, nextQuestionButton, countCheckedOption
 
     const questionOption = document.createElement("input");
     questionOption.id = key;
-    questionOption.value = text;
+    //questionOption.value = text;
+    questionOption.setAttribute('value', text);
     questionOption.name = "questionCheckbox";
     questionOption.type = "checkbox";
     questionOption.className = "custom-control-input";
@@ -188,7 +189,8 @@ export function createOption(text, key, nextQuestionButton) {
     const questionOption = document.createElement("input");
     questionOption.id = key;
     questionOption.name = "questionRadio";
-    questionOption.value = text;
+    //questionOption.value = text;
+    questionOption.setAttribute('value', text);
     questionOption.type = "radio";
     questionOption.className = "custom-control-input";
 
